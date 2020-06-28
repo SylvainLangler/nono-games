@@ -1,6 +1,20 @@
 const Express = require("express")();
 const Http = require("http").Server(Express);
-Socketio.set('origins', '*:*');
+
+const cors = require('cors');
+const whitelist = ['http://localhost:8080', 'http://localhost:3000', 'http://sylvainlangler.alwaysdata.net/nono-games/', 'http://sylvainlangler.alwaysdata.net/nono-games/server/'];
+const corsOptions = {
+  credentials: true, // This is important.
+  origin: (origin, callback) => {
+    if(whitelist.includes(origin))
+      return callback(null, true)
+
+      callback(new Error('Not allowed by CORS'));
+  }
+}
+
+Express.use(cors(corsOptions));
+
 const Socketio = require("socket.io")(Http);
 
 let position = {
