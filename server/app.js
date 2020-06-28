@@ -4,15 +4,19 @@ const Http = require("http").Server(Express);
 const cors = require('cors');
 const whitelist = ['http://localhost:8080', 'http://localhost:3000', 'http://sylvainlangler.alwaysdata.net/nono-games/', 'http://sylvainlangler.alwaysdata.net/nono-games/server/'];
 const corsOptions = {
-  credentials: true, // This is important.
-  origin: (origin, callback) => {
-    if(whitelist.includes(origin))
-      return callback(null, true)
-
-      callback(new Error('Not allowed by CORS'));
+	credentials: true, // This is important.
+	origin: (origin, callback) => {
+		if(whitelist.includes(origin))
+		return callback(null, true)
+		
+		callback(new Error('Not allowed by CORS'));
   }
 }
 
+Express.use(function (req, res, next) {
+	res.header("Access-Control-Allow-Origin", "http://sylvainlangler.alwaysdata.net/nono-games/");
+	res.header('Access-Control-Allow-Credentials', true);
+});
 Express.use(cors(corsOptions));
 
 const Socketio = require("socket.io")(Http);
