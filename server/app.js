@@ -1,5 +1,6 @@
 const Express = require("express")();
 const Http = require("http").Server(Express);
+Socketio.set('origins', '*:*');
 const Socketio = require("socket.io")(Http);
 
 let position = {
