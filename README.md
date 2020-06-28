@@ -1,6 +1,8 @@
 # nono-games
 
 ## Project setup
+
+### Vuejs
 ```
 npm install
 ```
@@ -22,3 +24,15 @@ npm run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+### NodeJS server 
+```
+npm install
+```
+
+```
+npm start
+```
+
+
+
