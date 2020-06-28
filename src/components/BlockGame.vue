@@ -33,7 +33,7 @@ export default {
 		};
 	},
 	created() {
-		this.socket = io("http://sylvainlangler.alwaysdata.net/nono-games/server/");
+		this.socket = io("http://sylvainlangler.alwaysdata.net");
 	},
 	mounted() {
 		this.context = this.$refs.game.getContext("2d");
