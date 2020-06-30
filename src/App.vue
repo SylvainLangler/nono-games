@@ -1,13 +1,15 @@
 <template>
 	<div id="app">
-		<div>
-			Entrez votre pseudo:
+		<div v-show="!ready">
+			<div>
+				Entrez votre pseudo:
+			</div>
+			<div>
+				<input type="text" name="username" id="username" v-model="username">
+				<button v-on:click="updateUsername(username)">Valider</button>
+			</div>
 		</div>
-		<div>
-			<input type="text" name="username" id="username" v-model="username">
-			<button v-on:click="updateUsername(username)">Valider</button>
-		</div>
-		<PokemonGame />
+		<PokemonGame :players="players" v-show="ready"/>
 	</div>
 </template>
 
@@ -44,6 +46,7 @@ export default {
 			this.socket.emit('newPlayerUsername', {
 				name: username
 			});
+			this.ready = true;
 		}
 	},
 

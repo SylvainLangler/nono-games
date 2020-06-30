@@ -1,6 +1,11 @@
 <template>
 	<div>
-		le jeu
+		<div>
+			<h3>Liste des joueurs</h3>
+			<div v-for="(player,index) in players" :key="index">
+				{{ player[1] }}
+			</div>
+		</div>
 	</div>
 </template>
 
@@ -8,14 +13,18 @@
 
 export default {
 	name: "PokemonGame",
+	props:{
+		players: Array
+	},
 	data() {
 		return {
-
+			
 		};
 	}, 
 	created() {
 	},
 	mounted() {
+		console.log(this.players);
 	},
 	methods: {
 	},
