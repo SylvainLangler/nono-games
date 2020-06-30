@@ -24,7 +24,7 @@ const Socketio = require("socket.io")(Http);
 // Liste des utilisateurs connectés
 let connectedUserMap = new Map();
 
-let players = []
+let players = [];
 
 // à la connexion
 Socketio.on('connection', function(socket){
@@ -55,11 +55,7 @@ Socketio.on('connection', function(socket){
 		// On supprime cet utilisateur de la map des utilisateurs
 		connectedUserMap.delete(socket.id);
 		// et des joueurs
-		players.forEach(player => {
-			if(player[0] === socket.id){
-				players.splice(player, 1);
-			}
-		});
+		players = players.filter(player => player[0] != socket.id);
 		// maj players
 		Socketio.emit('updatePlayers', players);
 	})
