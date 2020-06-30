@@ -14,12 +14,13 @@ const corsOptions = {
 }
 
 Express.use(function (req, res, next) {
-	res.header("Access-Control-Allow-Origin", "http://sylvainlangler.alwaysdata.net");
+	res.header("Access-Control-Allow-Origin", "http://localhost:8080");
 	res.header('Access-Control-Allow-Credentials', true);
 });
 Express.use(cors(corsOptions));
 
 const Socketio = require("socket.io")(Http);
+
 
 let position = {
 	x: 200,
@@ -52,6 +53,6 @@ Socketio.on("connection", (socket) => {
 	});
 });
 
-Http.listen(3000, () => {
+Http.listen(8101, () => {
 	console.log("Listening at :3000...");
 });
