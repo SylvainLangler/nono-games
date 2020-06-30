@@ -1,17 +1,18 @@
 <template>
 	<div id="app">
-		<BlockGame />
+		<PokemonGame />
 	</div>
 </template>
 
 <script>
-import BlockGame from "./components/BlockGame.vue";
+import PokemonGame from "./components/PokemonGame.vue";
 
 export default {
 	name: "App",
 	components: {
-		BlockGame,
+		PokemonGame,
 	},
+
 };
 </script>
 

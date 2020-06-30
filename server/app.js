@@ -21,38 +21,51 @@ Express.use(cors(corsOptions));
 
 const Socketio = require("socket.io")(Http);
 
+// Liste des utilisateurs connectés
+let connectedUserMap = new Map();
 
-let position = {
-	x: 200,
-	y: 200,
-};
+let players = []
 
-Socketio.on("connection", (socket) => {
-	socket.emit("position", position);
+// à la connexion
+Socketio.on('connection', function(socket){
 
-	socket.on("move", (data) => {
-		switch (data) {
-			case "left":
-				position.x -= 5;
-				// On appelle Socketio et non socket car Socketio va envoyer à tous les clients connectés
-				Socketio.emit("position", position);
-				break;
-			case "right":
-				position.x += 5;
-				Socketio.emit("position", position);
-				break;
-			case "up":
-				position.y -= 5;
-				Socketio.emit("position", position);
-				break;
-			case "down":
-				position.y += 5;
-				Socketio.emit("position", position);
-				break;
-		}
+	// On récupère l'id du socket
+	let connectedUserId = socket.id;
+
+	// On ajoute l'utilisateur à la map
+	connectedUserMap.set(socket.id, { status:'online', name: '' });
+	// On envoie un évent newPlayer au front avec l'utilisateur
+	Socketio.emit("newPlayer", connectedUserMap.get(connectedUserId));
+
+	// Si l'utilisateur entre un pseudo 
+	socket.on('newPlayerUsername', function(data){
+		// On met à jour son profil et on indique qu'il est bien considéré comme nouveau joueur
+		let user = connectedUserMap.get(connectedUserId);
+		user.name = data.name;
+
+		// On ajoute le joueur
+		players.push([socket.id, data.name]);
+
+		// On indique au front qu'il y a une maj des joueurs
+		Socketio.emit('updatePlayers', players);
 	});
+
+	// Si un joueur déco
+	socket.on('disconnect', function(){
+		// On supprime cet utilisateur de la map des utilisateurs
+		connectedUserMap.delete(socket.id);
+		// et des joueurs
+		players.forEach(player => {
+			if(player[0] === socket.id){
+				players.splice(player, 1);
+			}
+		});
+		// maj players
+		Socketio.emit('updatePlayers', players);
+	})
 });
 
+
 Http.listen(8101, () => {
-	console.log("Listening at :3000...");
+	console.log("Listening at :8101...");
 });
