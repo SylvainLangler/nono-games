@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<div v-show="!ready && joinable">
+		<div v-show="!ready">
 			<div>
 				Entrez votre pseudo:
 			</div>
@@ -39,7 +39,6 @@ export default {
 	mounted() {
 		this.socket.on('updatePlayers', (data) => {
 			this.players = data;
-			// console.log(this.players);
 		});
 
 		this.socket.on('preventJoining', () => {
@@ -50,7 +49,6 @@ export default {
 	methods: {
 		updateUsername(username){
 			if(username != '' && this.joinable){
-				console.log("hey");
 				this.socket.emit('newPlayerUsername', {
 					name: username
 				});
@@ -69,7 +67,6 @@ export default {
 
 		closeEntry(value){
 			this.joinable = value;
-			console.log(this.joinable);
 		}
 	},
 

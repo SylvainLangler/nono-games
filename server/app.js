@@ -31,7 +31,6 @@ let players = [];
 // à la connexion
 Socketio.on('connection', function(socket){
 
-	console.log("joinable"+ joinable);
 	if(joinable){
 		// On récupère l'id du socket
 		let connectedUserId = socket.id;
@@ -75,7 +74,6 @@ Socketio.on('connection', function(socket){
 	socket.on('startGame', function(){
 		Socketio.emit('startGame');
 		joinable = false;
-		console.log(joinable);
 	});
 });
 
