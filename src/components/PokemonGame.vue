@@ -9,11 +9,19 @@
 		</div>
 		<div>
 			<input type="text" name="pokemon" id="pokemon" @change="updateInput()" v-model="pokemon">
+			<div>
+				Liste des pokémons
+				<div v-for="(pokemon, index) in pokemons" :key="index">
+					{{ pokemon.name.french }}
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script>
+
+import axios from "axios";
 
 export default {
 	name: "PokemonGame",
@@ -25,6 +33,7 @@ export default {
 	data() {
 		return {
 			pokemon: '',
+			pokemons: null,
 		};
 	}, 
 	created() {
@@ -33,6 +42,10 @@ export default {
 		this.socket.on('updatePokemon', (data) => {
 			this.pokemon = data;
 		});
+
+		axios
+		.get('/static/pokemonjson/pokedex.json')
+		.then(response => (this.pokemons = response.data));
 	},
 	methods: {
 		updateInput(){
