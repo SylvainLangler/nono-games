@@ -9,7 +9,7 @@
 				<button v-on:click="updateUsername(username)">Valider</button>
 			</div>
 		</div>
-		<PokemonGame :players="players" v-show="ready"/>
+		<PokemonGame :players="players" :username="username" :socket="socket" v-show="ready"/>
 	</div>
 </template>
 
@@ -38,15 +38,21 @@ export default {
 	mounted() {
 		this.socket.on('updatePlayers', (data) => {
 			this.players = data;
-			console.log(this.players);
+			// console.log(this.players);
 		})
 	},
 	methods: {
 		updateUsername(username){
-			this.socket.emit('newPlayerUsername', {
-				name: username
-			});
-			this.ready = true;
+			if(username != ''){
+				this.socket.emit('newPlayerUsername', {
+					name: username
+				});
+				this.ready = true;
+				this.username = username;
+			}
+			else{
+				alert('Veuillez entrer votre pseudo');
+			}
 		}
 	},
 

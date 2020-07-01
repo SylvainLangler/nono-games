@@ -3,8 +3,12 @@
 		<div>
 			<h3>Liste des joueurs</h3>
 			<div v-for="(player,index) in players" :key="index">
-				{{ player[1] }}
+				<span>{{ player[1] }}</span>
+				<span v-if="player[1] === username"> (Moi)</span>
 			</div>
+		</div>
+		<div>
+			<input type="text" name="pokemon" id="pokemon" @change="updateInput()" v-model="pokemon">
 		</div>
 	</div>
 </template>
@@ -14,19 +18,26 @@
 export default {
 	name: "PokemonGame",
 	props:{
-		players: Array
+		username: String,
+		players: Array,
+		socket: Object
 	},
 	data() {
 		return {
-			
+			pokemon: '',
 		};
 	}, 
 	created() {
 	},
 	mounted() {
-		console.log(this.players);
+		this.socket.on('updatePokemon', (data) => {
+			this.pokemon = data;
+		});
 	},
 	methods: {
+		updateInput(){
+			this.socket.emit("inputPokemon", this.pokemon);
+		}
 	},
 };
 </script>

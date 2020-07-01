@@ -58,7 +58,11 @@ Socketio.on('connection', function(socket){
 		players = players.filter(player => player[0] != socket.id);
 		// maj players
 		Socketio.emit('updatePlayers', players);
-	})
+	});
+
+	socket.on('inputPokemon', function(data){
+		Socketio.emit('updatePokemon', data);
+	});
 });
 
 
