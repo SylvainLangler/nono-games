@@ -24,31 +24,39 @@ const Socketio = require("socket.io")(Http);
 // Liste des utilisateurs connectés
 let connectedUserMap = new Map();
 
+let joinable = true;
+
 let players = [];
 
 // à la connexion
 Socketio.on('connection', function(socket){
 
-	// On récupère l'id du socket
-	let connectedUserId = socket.id;
-
-	// On ajoute l'utilisateur à la map
-	connectedUserMap.set(socket.id, { status:'online', name: '' });
-	// On envoie un évent newPlayer au front avec l'utilisateur
-	Socketio.emit("newPlayer", connectedUserMap.get(connectedUserId));
-
-	// Si l'utilisateur entre un pseudo 
-	socket.on('newPlayerUsername', function(data){
-		// On met à jour son profil et on indique qu'il est bien considéré comme nouveau joueur
-		let user = connectedUserMap.get(connectedUserId);
-		user.name = data.name;
-
-		// On ajoute le joueur
-		players.push([socket.id, data.name]);
-
-		// On indique au front qu'il y a une maj des joueurs
-		Socketio.emit('updatePlayers', players);
-	});
+	console.log("joinable"+ joinable);
+	if(joinable){
+		// On récupère l'id du socket
+		let connectedUserId = socket.id;
+	
+		// On ajoute l'utilisateur à la map
+		connectedUserMap.set(socket.id, { status:'online', name: '' });
+		// On envoie un évent newPlayer au front avec l'utilisateur
+		Socketio.emit("newPlayer", connectedUserMap.get(connectedUserId));
+	
+		// Si l'utilisateur entre un pseudo 
+		socket.on('newPlayerUsername', function(data){
+			// On met à jour son profil et on indique qu'il est bien considéré comme nouveau joueur
+			let user = connectedUserMap.get(connectedUserId);
+			user.name = data.name;
+	
+			// On ajoute le joueur
+			players.push([socket.id, data.name]);
+	
+			// On indique au front qu'il y a une maj des joueurs
+			Socketio.emit('updatePlayers', players);
+		});
+	}
+	else{
+		socket.emit("preventJoining");
+	}
 
 	// Si un joueur déco
 	socket.on('disconnect', function(){
@@ -60,8 +68,14 @@ Socketio.on('connection', function(socket){
 		Socketio.emit('updatePlayers', players);
 	});
 
-	socket.on('inputPokemon', function(data){
-		Socketio.emit('updatePokemon', data);
+	// socket.on('inputPokemon', function(data){
+	// 	Socketio.emit('updatePokemon', data);
+	// });
+
+	socket.on('startGame', function(){
+		Socketio.emit('startGame');
+		joinable = false;
+		console.log(joinable);
 	});
 });
 

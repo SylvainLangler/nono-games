@@ -6,10 +6,11 @@
 				<span>{{ player[1] }}</span>
 				<span v-if="player[1] === username"> (Moi)</span>
 			</div>
+			<button v-on:click="sendReadyGame()" v-show="!gameReady">Lancer la partie</button>
 		</div>
-		<div>
-			<input type="text" name="pokemon" id="pokemon" @change="updateInput()" v-model="pokemon">
-			<div>
+		<div v-show="gameReady">
+			<input type="text" name="pokemon" id="pokemon" @change="checkPokemon()" v-model="pokemon">
+			<div style="margin-top:50px; display:flex;"> 
 				Liste des pokémons
 				<div v-for="(pokemon, index) in pokemons" :key="index">
 					{{ pokemon.name.french }}
@@ -33,23 +34,34 @@ export default {
 	data() {
 		return {
 			pokemon: '',
-			pokemons: null,
+			pokemons: [],
+			pokemonsFound: [],
+			gameReady: false,
 		};
 	}, 
 	created() {
 	},
 	mounted() {
-		this.socket.on('updatePokemon', (data) => {
-			this.pokemon = data;
-		});
+		// this.socket.on('updatePokemon', (data) => {
+		// 	this.pokemon = data;
+		// });
 
+		// On récupère tous les pokémons
 		axios
 		.get('/static/pokemonjson/pokedex.json')
 		.then(response => (this.pokemons = response.data));
+
+		this.socket.on('startGame', () => {
+			this.gameReady = true;
+			this.$emit('gameStarting', false);
+		});
 	},
 	methods: {
-		updateInput(){
-			this.socket.emit("inputPokemon", this.pokemon);
+		// updateInput(){
+		// 	this.socket.emit("inputPokemon", this.pokemon);
+		// },
+		sendReadyGame(){
+			this.socket.emit('startGame');
 		}
 	},
 };

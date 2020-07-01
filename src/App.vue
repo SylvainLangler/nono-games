@@ -1,6 +1,6 @@
 <template>
 	<div id="app">
-		<div v-show="!ready">
+		<div v-show="!ready && joinable">
 			<div>
 				Entrez votre pseudo:
 			</div>
@@ -9,7 +9,7 @@
 				<button v-on:click="updateUsername(username)">Valider</button>
 			</div>
 		</div>
-		<PokemonGame :players="players" :username="username" :socket="socket" v-show="ready"/>
+		<PokemonGame :players="players" :username="username" :socket="socket" v-show="ready" @gameStarting="closeEntry"/>
 	</div>
 </template>
 
@@ -28,6 +28,7 @@ export default {
 			socket: {},
 			players: [],
 			ready: false,
+			joinable: true,
 		};
 	}, 
 	created() {
@@ -39,11 +40,17 @@ export default {
 		this.socket.on('updatePlayers', (data) => {
 			this.players = data;
 			// console.log(this.players);
+		});
+
+		this.socket.on('preventJoining', () => {
+			this.ready = false;
+			document.getElementById('username').disabled = true;
 		})
 	},
 	methods: {
 		updateUsername(username){
-			if(username != ''){
+			if(username != '' && this.joinable){
+				console.log("hey");
 				this.socket.emit('newPlayerUsername', {
 					name: username
 				});
@@ -51,8 +58,18 @@ export default {
 				this.username = username;
 			}
 			else{
-				alert('Veuillez entrer votre pseudo');
+				if(!this.joinable){
+					alert('Une partie est déjà en cours');
+				}
+				else{
+					alert('Veuillez entrer votre pseudo');
+				}
 			}
+		},
+
+		closeEntry(value){
+			this.joinable = value;
+			console.log(this.joinable);
 		}
 	},
 
