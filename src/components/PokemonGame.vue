@@ -10,6 +10,12 @@
 		</div>
 		<div v-show="gameReady">
 			<input type="text" name="pokemon" id="pokemon" @change="checkPokemon()" v-model="pokemon">
+			<div>
+				<h2>Ordre des joueurs</h2>
+				<div v-for="(player, index) in order" :key="index">
+					{{ index+1 }}: {{ player }}
+				</div>
+			</div>
 			<div style="margin-top:50px; display:flex;"> 
 				Liste des pokémons
 				<div v-for="(pokemon, index) in pokemons" :key="index">
@@ -37,6 +43,7 @@ export default {
 			pokemons: [],
 			pokemonsFound: [],
 			gameReady: false,
+			order: [],
 		};
 	}, 
 	created() {
@@ -54,6 +61,7 @@ export default {
 		this.socket.on('startGame', () => {
 			this.gameReady = true;
 			this.$emit('gameStarting', false);
+			this.choosePlayersOrder();
 		});
 	},
 	methods: {
@@ -62,6 +70,12 @@ export default {
 		// },
 		sendReadyGame(){
 			this.socket.emit('startGame');
+		},
+
+		// Fonction qui choisit un ordre aléatoire pour les joueurs
+		// Potentiellement inutile
+		choosePlayersOrder(){
+			this.players.forEach(player => this.order.push(player[1]));
 		}
 	},
 };
