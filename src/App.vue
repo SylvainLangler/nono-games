@@ -39,6 +39,11 @@ export default {
 	mounted() {
 		this.socket.on('updatePlayers', (data) => {
 			this.players = data;
+			// S'il n'y a plus de joueurs -> on réouvre la room
+			if(!this.players.length){
+				this.ready = false;
+				this.joinable = true;
+			}
 		});
 
 		this.socket.on('preventJoining', () => {
@@ -56,7 +61,7 @@ export default {
 				this.username = username;
 			}
 			else{
-				if(!this.joinable){
+				if(!(this.joinable)){
 					alert('Une partie est déjà en cours');
 				}
 				else{
@@ -65,6 +70,7 @@ export default {
 			}
 		},
 
+		// pour les utilisateurs ayant la page du site ouverte, on passe la variable joinableà false
 		closeEntry(value){
 			this.joinable = value;
 		}

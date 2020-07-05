@@ -65,6 +65,10 @@ Socketio.on('connection', function(socket){
 		players = players.filter(player => player[0] != socket.id);
 		// maj players
 		Socketio.emit('updatePlayers', players);
+		// S'il n'y a plus de joueurs -> on réouvre la room
+		if(!players.length){
+			joinable = true;
+		}
 	});
 
 	// socket.on('inputPokemon', function(data){
