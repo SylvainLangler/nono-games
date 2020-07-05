@@ -52,7 +52,7 @@ export default {
 	}, 
 	created() {
 		
-		if(localStorage.getItem('listePokemons') != ''){
+		if(localStorage.getItem('listePokemons') != null){
 			this.pokemons = localStorage.getItem('listePokemons');
 		}
 		else{
