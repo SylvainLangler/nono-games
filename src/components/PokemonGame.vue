@@ -21,7 +21,7 @@
 			<div style="margin-top:50px; display:flex;"> 
 				Liste des pokémons
 				<div v-for="(pokemon, index) in pokemons" :key="index">
-					{{ pokemon.name.french }}
+					{{ pokemon }}
 				</div>
 			</div>
 		</div>
@@ -51,17 +51,23 @@ export default {
 		};
 	}, 
 	created() {
+		
+		if(localStorage.getItem('listePokemons') != ''){
+			this.pokemons = localStorage.getItem('listePokemons');
+		}
+		else{
+			// On récupère tous les pokémons
+			for(let i = 1; i<150; i++){
+				axios
+				.get('https://pokeapi.co/api/v2/pokemon-species/'+i)
+				.then(response => (this.pokemons.push(response.data.names[4].name)));
+			}
+		}
+		localStorage.setItem('listePokemons', this.pokemons);
+
+		console.log(localStorage.getItem('listePokemons'));
 	},
 	mounted() {
-
-		// this.socket.on('updatePokemon', (data) => {
-		// 	this.pokemon = data;
-		// });
-
-		// On récupère tous les pokémons
-		axios
-		.get('/static/pokemonjson/pokedex.json')
-		.then(response => (this.pokemons = response.data));
 
 		this.socket.on('startGame', (player) => {
 			this.gameReady = true;
