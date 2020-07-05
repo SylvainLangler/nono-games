@@ -47,7 +47,7 @@ Socketio.on('connection', function(socket){
 			user.name = data.name;
 	
 			// On ajoute le joueur
-			players.push([socket.id, data.name]);
+			players.push(data.name);
 	
 			// On indique au front qu'il y a une maj des joueurs
 			Socketio.emit('updatePlayers', players);
@@ -59,10 +59,10 @@ Socketio.on('connection', function(socket){
 
 	// Si un joueur déco
 	socket.on('disconnect', function(){
+		// On supprime le joueur de la liste des joueurs
+		players = players.filter(player => player != connectedUserMap.get(socket.id).name);
 		// On supprime cet utilisateur de la map des utilisateurs
 		connectedUserMap.delete(socket.id);
-		// et des joueurs
-		players = players.filter(player => player[0] != socket.id);
 		// maj players
 		Socketio.emit('updatePlayers', players);
 		// S'il n'y a plus de joueurs -> on réouvre la room
@@ -71,15 +71,28 @@ Socketio.on('connection', function(socket){
 		}
 	});
 
-	// socket.on('inputPokemon', function(data){
-	// 	Socketio.emit('updatePokemon', data);
-	// });
-
 	socket.on('startGame', function(){
-		Socketio.emit('startGame');
+		Socketio.emit('startGame', players[0]);
 		joinable = false;
 	});
+
+	socket.on('turn', function(player){
+		let indexPlayer = players.indexOf(player);
+		let indexNextPlayer = getNextPlayer(indexPlayer);
+		Socketio.emit('nextTurn', indexNextPlayer);
+	});
 });
+
+function getNextPlayer(indexPlayer){
+	// 2 joueurs, players.length = 1, index du dernier joueur = 1
+	// Si l'index du joueur courant est le dernier (c'est à dire = players.length)
+	if(indexPlayer === players.length-1){
+		return 0;
+	}
+	else{
+		return indexPlayer+1;
+	}
+}
 
 
 Http.listen(8101, () => {

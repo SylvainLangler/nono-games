@@ -3,19 +3,21 @@
 		<div>
 			<h3>Liste des joueurs</h3>
 			<div v-for="(player,index) in players" :key="index">
-				<span>{{ player[1] }}</span>
-				<span v-if="player[1] === username"> (Moi)</span>
+				<span>{{ player }}</span>
+				<span v-if="player === username"> (Moi)</span>
 			</div>
 			<button v-on:click="sendReadyGame()" v-show="!gameReady">Lancer la partie</button>
 		</div>
 		<div v-show="gameReady">
-			<input type="text" name="pokemon" id="pokemon" @change="checkPokemon()" v-model="pokemon">
 			<div>
 				<h2>Ordre des joueurs</h2>
-				<div v-for="(player, index) in order" :key="index">
+				<div v-for="(player, index) in players" :key="index">
 					{{ index+1 }}: {{ player }}
 				</div>
 			</div>
+			<div>Joueur actuel: {{ playing }}</div>
+			<input type="text" name="pokemon" id="pokemon" v-model="pokemon">
+			<button v-on:click="inputPokemonChange()">Valider</button>
 			<div style="margin-top:50px; display:flex;"> 
 				Liste des pokémons
 				<div v-for="(pokemon, index) in pokemons" :key="index">
@@ -44,11 +46,14 @@ export default {
 			pokemonsFound: [],
 			gameReady: false,
 			order: [],
+			myTurn: false,
+			playing: '',
 		};
 	}, 
 	created() {
 	},
 	mounted() {
+
 		// this.socket.on('updatePokemon', (data) => {
 		// 	this.pokemon = data;
 		// });
@@ -58,24 +63,37 @@ export default {
 		.get('/static/pokemonjson/pokedex.json')
 		.then(response => (this.pokemons = response.data));
 
-		this.socket.on('startGame', () => {
+		this.socket.on('startGame', (player) => {
 			this.gameReady = true;
 			this.$emit('gameStarting', false);
-			this.choosePlayersOrder();
+			this.playing = player;
+			if(this.username === this.playing){
+				this.myTurn = true;
+			}
+		});
+
+		this.socket.on('nextTurn', (indexNextPlayer) => {
+			this.playing = this.players[indexNextPlayer];
+			if(this.players[indexNextPlayer] === this.username){
+				this.myTurn = true;
+			}
 		});
 	},
 	methods: {
-		// updateInput(){
-		// 	this.socket.emit("inputPokemon", this.pokemon);
-		// },
 		sendReadyGame(){
 			this.socket.emit('startGame');
 		},
 
-		// Fonction qui choisit un ordre aléatoire pour les joueurs
-		// Potentiellement inutile
-		choosePlayersOrder(){
-			this.players.forEach(player => this.order.push(player[1]));
+		inputPokemonChange(){
+			if(this.myTurn){
+				if(this.pokemon === 'pikachu'){
+					this.myTurn = false;
+					this.socket.emit('turn', this.playing);
+				}
+			}
+			else{
+				alert("Ce n'est pas ton tour");
+			}
 		}
 	},
 };
