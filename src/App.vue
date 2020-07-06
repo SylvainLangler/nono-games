@@ -45,7 +45,7 @@ export default {
 	created() {
 		// localhost:8101
 		// sylvainlangler.alwaysdata.net
-		this.socket = io("sylvainlangler.alwaysdata.net");
+		this.socket = io("localhost:8101");
 	},
 	mounted() {
 		this.socket.on("updatePlayers", (data) => {

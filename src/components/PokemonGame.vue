@@ -51,23 +51,11 @@ export default {
 		};
 	}, 
 	created() {
-		
-		if(localStorage.getItem('listePokemons') != null){
-			this.pokemons = localStorage.getItem('listePokemons');
-		}
-		else{
-			// On récupère tous les pokémons
-			for(let i = 1; i<150; i++){
-				axios
-				.get('https://pokeapi.co/api/v2/pokemon-species/'+i)
-				.then(response => (this.pokemons.push(response.data.names[4].name)));
-			}
-		}
-		localStorage.setItem('listePokemons', this.pokemons);
 
-		console.log(localStorage.getItem('listePokemons'));
 	},
 	mounted() {
+
+		this.getPokemons();
 
 		this.socket.on('startGame', (player) => {
 			this.gameReady = true;
@@ -84,8 +72,28 @@ export default {
 				this.myTurn = true;
 			}
 		});
+
 	},
 	methods: {
+		getPokemons(){
+			// On récupère tous les pokémons
+			let pokemons = localStorage.getItem('pokemons');
+			if(!pokemons){
+				pokemons = [];
+				for(let i = 1; i<150; i++){
+					axios
+					.get('https://pokeapi.co/api/v2/pokemon-species/'+i)
+					.then(response => {
+						pokemons.push(response.data.names[4].name);
+						localStorage.setItem('pokemons', JSON.stringify(pokemons));
+					});
+				}
+			}
+			else{
+				this.pokemons = JSON.parse(pokemons);
+			}
+		},
+
 		sendReadyGame(){
 			this.socket.emit('startGame');
 		},
