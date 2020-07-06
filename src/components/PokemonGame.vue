@@ -18,10 +18,11 @@
 			<div>Joueur actuel: {{ playing }}</div>
 			<input type="text" name="pokemon" id="pokemon" v-model="pokemon">
 			<button v-on:click="inputPokemonChange()">Valider</button>
-			<div style="margin-top:50px; display:flex;"> 
-				Liste des pokémons
-				<div v-for="(pokemon, index) in pokemons" :key="index">
-					{{ pokemon }}
+			<h3>Liste des pokémons</h3>
+			<div style="margin-top:50px; display:flex; flex-wrap:wrap;"> 
+				<div v-for="(pokemon, index) in pokemons" :key="index" style="width:80px; margin:5px; padding:2px;">
+					<div style="text-align:center">{{ pokemon.name }}</div>
+					<img :src="pokemon.img" style="width:100%;">
 				</div>
 			</div>
 		</div>
@@ -75,17 +76,40 @@ export default {
 
 	},
 	methods: {
+
+		compare(a, b) {
+			const idA = a.id;
+			const idB = b.id;
+
+			let comparison = 0;
+			if (idA > idB) {
+				comparison = 1;
+			} else if (idA < idB) {
+				comparison = -1;
+			}
+			return comparison;
+		},
+
 		getPokemons(){
 			// On récupère tous les pokémons
 			let pokemons = localStorage.getItem('pokemons');
-			if(!pokemons){
+			if(!pokemons || pokemons === ''){
 				pokemons = [];
-				for(let i = 1; i<150; i++){
+				for(let i = 1; i<=151; i++){
 					axios
 					.get('https://pokeapi.co/api/v2/pokemon-species/'+i)
 					.then(response => {
-						pokemons.push(response.data.names[4].name);
-						localStorage.setItem('pokemons', JSON.stringify(pokemons));
+						let pokemonName = response.data.names[4].name;
+						axios
+						.get('https://pokeapi.co/api/v2/pokemon/'+i)
+						.then(response2 => {
+							let pokemonImg = response2.data.sprites.front_default;
+							let pokemon = {id: i, name: pokemonName, img: pokemonImg}
+							pokemons.push(pokemon);
+							localStorage.setItem('pokemons', JSON.stringify(pokemons));	
+							this.pokemons = JSON.parse(localStorage.getItem('pokemons'));
+							this.pokemons.sort(this.compare);
+						});
 					});
 				}
 			}
