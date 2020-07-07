@@ -16,11 +16,10 @@
 				</div>
 			</div>
 			<div>Joueur actuel: {{ playing }}</div>
-			<input type="text" name="pokemon" id="pokemon" v-model="pokemon">
-			<button v-on:click="inputPokemonChange()">Valider</button>
+			<input type="text" name="pokemon" id="pokemon" v-model="pokemon" @change="inputPokemonChange" autocomplete="off">
 			<h3>Liste des pokémons</h3>
-			<div style="margin-top:50px; display:flex; flex-wrap:wrap;"> 
-				<div v-for="(pokemon, index) in pokemons" :key="index" style="width:80px; margin:5px; padding:2px;">
+			<div style="margin-top:50px; display:flex; flex-wrap:wrap;" class="pokemons"> 
+				<div v-for="(pokemon, index) in pokemons" :key="index" :id="'poke'+pokemon.id" style="width:80px; margin:5px; padding:2px; display:none;">
 					<div style="text-align:center">{{ pokemon.name }}</div>
 					<img :src="pokemon.img" style="width:100%;">
 				</div>
@@ -45,6 +44,7 @@ export default {
 			pokemon: '',
 			pokemons: [],
 			pokemonsFound: [],
+			pokemonsFoundable: [],
 			gameReady: false,
 			order: [],
 			myTurn: false,
@@ -74,9 +74,16 @@ export default {
 			}
 		});
 
+		this.socket.on('pokemonFound', (data) => {
+			this.pokemonsFound = data.pokemonsFound;
+			this.pokemonsFoundable = data.pokemonsFoundable;
+			document.getElementById('poke'+data.pokemonId).style.display = 'block';
+		});
+
 	},
 	methods: {
 
+		// Fonction récupérée, utilisée lors du array.sort pour trier les pokémons dans l'ordre
 		compare(a, b) {
 			const idA = a.id;
 			const idB = b.id;
@@ -99,16 +106,16 @@ export default {
 					axios
 					.get('https://pokeapi.co/api/v2/pokemon-species/'+i)
 					.then(response => {
-						let pokemonName = response.data.names[4].name;
+						let pokemonName = response.data.names[4].name.replace(/[^\p{L}0-9-]/u, '');
 						axios
 						.get('https://pokeapi.co/api/v2/pokemon/'+i)
 						.then(response2 => {
 							let pokemonImg = response2.data.sprites.front_default;
 							let pokemon = {id: i, name: pokemonName, img: pokemonImg}
 							pokemons.push(pokemon);
+							pokemons.sort(this.compare);
 							localStorage.setItem('pokemons', JSON.stringify(pokemons));	
 							this.pokemons = JSON.parse(localStorage.getItem('pokemons'));
-							this.pokemons.sort(this.compare);
 						});
 					});
 				}
@@ -116,6 +123,8 @@ export default {
 			else{
 				this.pokemons = JSON.parse(pokemons);
 			}
+
+			this.pokemonsFoundable = Object.assign([], this.pokemons);
 		},
 
 		sendReadyGame(){
@@ -124,14 +133,48 @@ export default {
 
 		inputPokemonChange(){
 			if(this.myTurn){
-				if(this.pokemon === 'pikachu'){
+				let pokeFound = [];
+				this.pokemonsFoundable.forEach((poke) => {
+					if(this.pokemon.toLowerCase() === poke.name.toLowerCase()){
+						pokeFound.push(poke.id);
+					}
+				});
+				if(pokeFound.length > 0){
+					this.validatePokemons(pokeFound);
 					this.myTurn = false;
 					this.socket.emit('turn', this.playing);
 				}
+				this.pokemon = '';
 			}
 			else{
 				alert("Ce n'est pas ton tour");
 			}
+		},
+
+		validatePokemons(pokeFound){
+			pokeFound.forEach((idPoke) => {
+				this.pokemonsFound.push(idPoke);
+				// On retire le pokemon trouvé de la liste des pokémons trouvables
+				this.removePokemon(idPoke);
+				// Pour chaque pokémon trouvé dans la liste des pokés, on l'affiche ou quoi
+				this.pokemons.forEach((pokemon) => {
+					if(pokemon.id === idPoke){
+						document.getElementById('poke'+idPoke).style.display = 'block';
+						this.socket.emit('pokemonFound', {pokemonId: pokemon.id, pokemonsFound : this.pokemonsFound, pokemonsFoundable: this.pokemonsFoundable});
+					}
+				});
+			});
+		},
+
+		// Fonction qui supprime un pokémon de la liste des pokémons trouvable en fonction de son id
+		removePokemon(id){
+			// Pour chaque pokémon dans la liste des trouvables
+			this.pokemonsFoundable.forEach((pokemon, index) => {
+				// Si on trouve le pokémon dans la liste
+				if(pokemon.id === id){
+					this.pokemonsFoundable.splice(index, 1);
+				}
+			});
 		}
 	},
 };

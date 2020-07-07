@@ -81,6 +81,10 @@ Socketio.on('connection', function(socket){
 		let indexNextPlayer = getNextPlayer(indexPlayer);
 		Socketio.emit('nextTurn', indexNextPlayer);
 	});
+
+	socket.on('pokemonFound', function(data){
+		Socketio.emit('pokemonFound', data);
+	});
 });
 
 function getNextPlayer(indexPlayer){
