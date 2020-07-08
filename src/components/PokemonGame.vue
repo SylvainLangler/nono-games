@@ -44,7 +44,6 @@ export default {
 			pokemon: '',
 			pokemons: [],
 			pokemonsFound: [],
-			pokemonsFoundable: [],
 			gameReady: false,
 			order: [],
 			myTurn: false,
@@ -80,7 +79,7 @@ export default {
 		// Lorsque le serveur indique qu'un pokémon est trouvé
 		this.socket.on('pokemonFound', (data) => {
 			this.pokemonsFound = data.pokemonsFound;
-			this.pokemonsFoundable = data.pokemonsFoundable;
+			this.pokemons = data.pokemons;
 		});
 
 	},
@@ -126,9 +125,6 @@ export default {
 			else{
 				this.pokemons = JSON.parse(pokemons);
 			}
-
-			// Duplicata de la liste
-			this.pokemonsFoundable = Object.assign([], this.pokemons);
 		},
 
 		sendReadyGame(){
@@ -138,7 +134,7 @@ export default {
 		inputPokemonChange(){
 			if(this.myTurn){
 				let pokeFound = [];
-				this.pokemonsFoundable.forEach((poke) => {
+				this.pokemons.forEach((poke) => {
 					if(this.pokemon.toLowerCase() === poke.name.toLowerCase()){
 						pokeFound.push(poke.id);
 					}
@@ -157,13 +153,13 @@ export default {
 
 		validatePokemons(pokeFound){
 			pokeFound.forEach((idPoke) => {
-				// On retire le pokemon trouvé de la liste des pokémons trouvables
-				this.removePokemon(idPoke);
 				// Pour chaque pokémon trouvé dans la liste des pokés, on l'affiche ou quoi
 				this.pokemons.forEach((pokemon) => {
 					if(pokemon.id === idPoke){
 						this.pokemonsFound.push(pokemon);
-						this.socket.emit('pokemonFound', {pokemonId: pokemon.id, pokemonsFound : this.pokemonsFound, pokemonsFoundable: this.pokemonsFoundable});
+						// On retire le pokemon trouvé de la liste des pokémons trouvables
+						this.removePokemon(idPoke);
+						this.socket.emit('pokemonFound', {pokemonId: pokemon.id, pokemonsFound : this.pokemonsFound, pokemons: this.pokemons});
 					}
 				});
 			});
@@ -172,10 +168,10 @@ export default {
 		// Fonction qui supprime un pokémon de la liste des pokémons trouvable en fonction de son id
 		removePokemon(id){
 			// Pour chaque pokémon dans la liste des trouvables
-			this.pokemonsFoundable.forEach((pokemon, index) => {
+			this.pokemons.forEach((pokemon, index) => {
 				// Si on trouve le pokémon dans la liste
 				if(pokemon.id === id){
-					this.pokemonsFoundable.splice(index, 1);
+					this.pokemons.splice(index, 1);
 				}
 			});
 		}
