@@ -19,7 +19,7 @@
 			<input type="text" name="pokemon" id="pokemon" v-model="pokemon" @change="inputPokemonChange" autocomplete="off">
 			<h3>Liste des pokémons</h3>
 			<div style="margin-top:50px; display:flex; flex-wrap:wrap;" class="pokemons"> 
-				<div v-for="(pokemon, index) in pokemons" :key="index" :id="'poke'+pokemon.id" style="width:80px; margin:5px; padding:2px; display:none;">
+				<div v-for="(pokemon, index) in pokemonsFound" :key="index" :id="'poke'+pokemon.id" style="width:80px; margin:5px; padding:2px;">
 					<div style="text-align:center">{{ pokemon.name }}</div>
 					<img :src="pokemon.img" style="width:100%;">
 				</div>
@@ -56,8 +56,10 @@ export default {
 	},
 	mounted() {
 
+		// On récupère la liste des pokémons
 		this.getPokemons();
 
+		// Lorsqu'on reçoit le signal du début de partie par le serveur
 		this.socket.on('startGame', (player) => {
 			this.gameReady = true;
 			this.$emit('gameStarting', false);
@@ -67,6 +69,7 @@ export default {
 			}
 		});
 
+		// Signal du serveur que le tour va passer au suivant
 		this.socket.on('nextTurn', (indexNextPlayer) => {
 			this.playing = this.players[indexNextPlayer];
 			if(this.players[indexNextPlayer] === this.username){
@@ -74,10 +77,10 @@ export default {
 			}
 		});
 
+		// Lorsque le serveur indique qu'un pokémon est trouvé
 		this.socket.on('pokemonFound', (data) => {
 			this.pokemonsFound = data.pokemonsFound;
 			this.pokemonsFoundable = data.pokemonsFoundable;
-			document.getElementById('poke'+data.pokemonId).style.display = 'block';
 		});
 
 	},
@@ -124,6 +127,7 @@ export default {
 				this.pokemons = JSON.parse(pokemons);
 			}
 
+			// Duplicata de la liste
 			this.pokemonsFoundable = Object.assign([], this.pokemons);
 		},
 
@@ -153,13 +157,12 @@ export default {
 
 		validatePokemons(pokeFound){
 			pokeFound.forEach((idPoke) => {
-				this.pokemonsFound.push(idPoke);
 				// On retire le pokemon trouvé de la liste des pokémons trouvables
 				this.removePokemon(idPoke);
 				// Pour chaque pokémon trouvé dans la liste des pokés, on l'affiche ou quoi
 				this.pokemons.forEach((pokemon) => {
 					if(pokemon.id === idPoke){
-						document.getElementById('poke'+idPoke).style.display = 'block';
+						this.pokemonsFound.push(pokemon);
 						this.socket.emit('pokemonFound', {pokemonId: pokemon.id, pokemonsFound : this.pokemonsFound, pokemonsFoundable: this.pokemonsFoundable});
 					}
 				});
