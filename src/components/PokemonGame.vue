@@ -16,6 +16,7 @@
 				</div>
 			</div>
 			<div>Joueur actuel: {{ playing }}</div>
+			<div>{{ countDown }}</div>
 			<input type="text" name="pokemon" id="pokemon" v-model="pokemon" @change="inputPokemonChange" autocomplete="off">
 			<h3>Liste des pokémons</h3>
 			<div style="margin-top:50px; display:flex; flex-wrap:wrap;" class="pokemons"> 
@@ -48,10 +49,11 @@ export default {
 			order: [],
 			myTurn: false,
 			playing: '',
+			countDown: 10,
 		};
 	}, 
 	created() {
-
+		// this.countDownTimer()
 	},
 	mounted() {
 
@@ -66,6 +68,7 @@ export default {
 			if(this.username === this.playing){
 				this.myTurn = true;
 			}
+			this.countDownTimer();
 		});
 
 		// Signal du serveur que le tour va passer au suivant
@@ -74,6 +77,8 @@ export default {
 			if(this.players[indexNextPlayer] === this.username){
 				this.myTurn = true;
 			}
+			this.countDown = 10;
+			this.countDownTimer(stop);
 		});
 
 		// Lorsque le serveur indique qu'un pokémon est trouvé
@@ -174,8 +179,32 @@ export default {
 					this.pokemons.splice(index, 1);
 				}
 			});
+		},
+
+		countDownTimer(stop) {
+			let t
+			if(!stop){
+				if(this.countDown > 0) {
+						t = setTimeout(() => {
+							this.countDown -= 1;
+							this.countDownTimer();
+						}, 1000);
+				}
+			}
+			else{
+				clearTimeout(t);
+			}	
 		}
 	},
+	watch: {
+		
+		countDown:function(time){
+			if(time === 0 && this.playing === this.username){
+				alert('Vous avez perdu');
+				// emit
+			}
+		}
+	}
 };
 </script>
 
