@@ -85,6 +85,14 @@ Socketio.on('connection', function(socket){
 	socket.on('pokemonFound', function(data){
 		Socketio.emit('pokemonFound', data);
 	});
+
+	socket.on('playerLost', function(playerName){
+		let indexPlayer = players.indexOf(playerName);
+		let indexNextPlayer = getNextPlayer(indexPlayer);
+		players = players.filter(player => player != playerName);
+		Socketio.emit('updatePlayers', players);
+		Socketio.emit('nextTurn', indexNextPlayer);
+	});
 });
 
 function getNextPlayer(indexPlayer){

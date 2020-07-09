@@ -55,6 +55,9 @@ export default {
 				this.ready = false;
 				this.joinable = true;
 			}
+			if(this.ready === true && this.joinable === false && this.players.length === 1 && this.players[0] === this.username){
+				alert('Gagné');
+			}
 		});
 
 		this.socket.on("preventJoining", () => {

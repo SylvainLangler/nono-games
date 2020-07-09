@@ -79,12 +79,16 @@ export default {
 			}
 			this.countDown = 10;
 			this.countDownTimer(stop);
+			setTimeout(() => this.countDownTimer(), 5000);
 		});
 
 		// Lorsque le serveur indique qu'un pokémon est trouvé
 		this.socket.on('pokemonFound', (data) => {
 			this.pokemonsFound = data.pokemonsFound;
 			this.pokemons = data.pokemons;
+			if(this.pokemons.length === 0){
+				alert('Bravo, vous avez tous gagné !');
+			}
 		});
 
 	},
@@ -197,13 +201,13 @@ export default {
 		}
 	},
 	watch: {
-		
 		countDown:function(time){
 			if(time === 0 && this.playing === this.username){
-				alert('Vous avez perdu');
-				// emit
+				console.log("perdu");
+				this.socket.emit('playerLost', this.playing);
 			}
-		}
+		},
+
 	}
 };
 </script>
