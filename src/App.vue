@@ -1,26 +1,29 @@
 <template>
 	<div id="app">
-		<div v-show="!ready">
-			<div>
-				Entrez votre pseudo:
-			</div>
-			<div>
-				<input
+		<div class="inner">
+			<div v-show="!ready" class="inscription">
+				<div class="label-pseudo">
+					Entrez votre pseudo:
+				</div>
+				<div class="container-pseudo">
+					<input
+					class="input-pseudo"
 					type="text"
 					name="username"
 					id="username"
 					v-model="username"
-				/>
-				<button v-on:click="updateUsername(username)">Valider</button>
+					/>
+					<button class="valider-pseudo" v-on:click="updateUsername(username)">Jouer</button>
+				</div>
 			</div>
+			<PokemonGame
+				:players="players"
+				:username="username"
+				:socket="socket"
+				v-show="ready"
+				@gameStarting="closeEntry"
+			/>
 		</div>
-		<PokemonGame
-			:players="players"
-			:username="username"
-			:socket="socket"
-			v-show="ready"
-			@gameStarting="closeEntry"
-		/>
 	</div>
 </template>
 
@@ -90,4 +93,80 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+
+@import url('<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500&display=swap" rel="stylesheet">');
+
+html, body{
+	font-family: 'Raleway', sans-serif;
+}
+
+body{
+	/* background: linear-gradient(180deg, rgba(71,164,157,1) 0%, rgba(176,255,229,1) 100%); */
+	background: linear-gradient(180deg, rgba(33,51,83,1) 0%, rgba(8,13,14,1) 100%);
+}
+
+.inner{
+	display:flex;
+	justify-content: center;
+	width:100%;
+	height:100vh;
+}
+
+.inscription{
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	margin-top:100px;
+	height: 200px;
+    padding: 20px;
+    justify-content: center;
+    background-color: #0f314c;
+    border: 3px solid #28567b;
+    border-radius: 20px;
+    width: 500px;
+}
+
+.label-pseudo{
+	font-size:26px;
+	color:#d6f4ff;
+}
+
+.container-pseudo{
+	margin-top:30px;
+	display:flex;
+	justify-content: center;
+	flex-wrap:wrap;
+}
+
+.input-pseudo{
+	width:200px;
+	height:40px;
+	font-size:22px;
+}
+
+.valider-pseudo{
+	margin-left: 25px;
+    width: 120px;
+    cursor: pointer;
+    font-size: 22px;
+    color: #d6f4ff;
+    background-color: #28567b;
+    border: 1px solid #28567b;
+    border-radius: 5px;
+}
+
+@media screen and (min-width:1024px){
+	.inscription{
+		margin-top:250px;
+	}
+}
+
+@media screen and (min-width:1750px){
+	.inner{
+		width:1750px;
+		margin:0 auto;
+	}
+}
+
+</style>

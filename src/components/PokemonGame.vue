@@ -17,7 +17,7 @@
 			</div>
 			<div>Joueur actuel: {{ playing }}</div>
 			<div>{{ countDown }}</div>
-			<input type="text" name="pokemon" id="pokemon" v-model="pokemon" @change="inputPokemonChange" autocomplete="off">
+			<input type="text" name="pokemon" id="pokemon" v-model="pokemon" @input="inputPokemonChange" autocomplete="off">
 			<h3>Liste des pokémons</h3>
 			<div style="margin-top:50px; display:flex; flex-wrap:wrap;" class="pokemons"> 
 				<div v-for="(pokemon, index) in pokemonsFound" :key="index" :id="'poke'+pokemon.id" style="width:80px; margin:5px; padding:2px;">
@@ -49,11 +49,8 @@ export default {
 			order: [],
 			myTurn: false,
 			playing: '',
-			countDown: 10,
+			countDown: 15,
 		};
-	}, 
-	created() {
-		// this.countDownTimer()
 	},
 	mounted() {
 
@@ -77,7 +74,7 @@ export default {
 			if(this.players[indexNextPlayer] === this.username){
 				this.myTurn = true;
 			}
-			this.countDown = 10;
+			this.countDown = 15;
 			this.countDownTimer(stop);
 		});
 
@@ -151,8 +148,8 @@ export default {
 					this.validatePokemons(pokeFound);
 					this.myTurn = false;
 					this.socket.emit('turn', this.playing);
+					this.pokemon = '';
 				}
-				this.pokemon = '';
 			}
 			else{
 				alert("Ce n'est pas ton tour");
@@ -205,7 +202,7 @@ export default {
 	watch: {
 		countDown:function(time){
 			if(time === 0 && this.playing === this.username){
-				console.log("perdu");
+				alert('Perdu');
 				this.socket.emit('playerLost', this.playing);
 			}
 		},
