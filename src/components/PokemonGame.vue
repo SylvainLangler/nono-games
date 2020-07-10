@@ -79,7 +79,6 @@ export default {
 			}
 			this.countDown = 10;
 			this.countDownTimer(stop);
-			setTimeout(() => this.countDownTimer(), 5000);
 		});
 
 		// Lorsque le serveur indique qu'un pokémon est trouvé
@@ -193,6 +192,9 @@ export default {
 							this.countDown -= 1;
 							this.countDownTimer();
 						}, 1000);
+				}
+				else{
+					clearTimeout(t);
 				}
 			}
 			else{
