@@ -86,16 +86,33 @@ Socketio.on('connection', function(socket){
 		Socketio.emit('pokemonFound', data);
 	});
 
+	// Lorsqu'un joueur perd
 	socket.on('playerLost', function(playerName){
+		// Index du joueur qui a perdu
 		let indexPlayer = players.indexOf(playerName);
+
+		// Mise à jour des joueurs
 		players = players.filter(player => player != playerName);
-		let indexNextPlayer = getNextPlayer(indexPlayer-1);
+
+		if(indexPlayer === 0){
+			indexNextPlayer = 0;
+		}
+		else{
+			if(indexPlayer === players.length){
+				indexNextPlayer = 0;
+			}
+			else{
+				indexNextPlayer = indexPlayer;
+			}
+		}
+		
 		Socketio.emit('updatePlayers', players);
 		Socketio.emit('nextTurn', indexNextPlayer);
 		Socketio.emit('playerLost', playerName);
+		
 	});
 
-	socket.on('winner', function(winner){
+	socket.on('winnerUser', function(winner){
 		Socketio.emit('winner', winner);
 	});
 });
