@@ -1,6 +1,9 @@
 <template>
 	<div id="app">
 		<div class="inner">
+			<div class="titre">
+				Nono Games
+			</div>
 			<div v-show="!ready" class="inscription">
 				<div class="label-pseudo">
 					Entrez votre pseudo:
@@ -48,7 +51,7 @@ export default {
 	created() {
 		// localhost:8101
 		// sylvainlangler.alwaysdata.net
-		this.socket = io("sylvainlangler.alwaysdata.net");
+		this.socket = io("localhost:8101");
 	},
 	mounted() {
 		this.socket.on("updatePlayers", (data) => {
@@ -58,9 +61,10 @@ export default {
 				this.ready = false;
 				this.joinable = true;
 			}
-			if(this.ready === true && this.joinable === false && this.players.length === 1 && this.players[0] === this.username){
-				alert('Gagné');
-			}
+			// if(this.ready === true && this.joinable === false && this.players.length === 1 && this.players[0] === this.username){
+			// 	console.log("gagné");
+			// 	this.winner = this.username;
+			// }
 		});
 
 		this.socket.on("preventJoining", () => {
@@ -97,43 +101,63 @@ export default {
 
 @import url('<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500&display=swap" rel="stylesheet">');
 
+@font-face {
+ font-family: "Pokemon";
+ src: url("/static/fonts/pokemon_hollow.woff") format("woff")
+}
+
 html, body{
 	font-family: 'Raleway', sans-serif;
+	margin: 0;
+	padding: 0;
+	box-sizing:border-box;
 }
 
 body{
 	/* background: linear-gradient(180deg, rgba(71,164,157,1) 0%, rgba(176,255,229,1) 100%); */
-	background: linear-gradient(180deg, rgba(33,51,83,1) 0%, rgba(8,13,14,1) 100%);
+	background-image: url("/static/background.png");
 }
 
 .inner{
-	display:flex;
-	justify-content: center;
 	width:100%;
 	height:100vh;
+}
+
+.titre{
+	display: flex;
+    justify-content: center;
+    background-color: yellow;
+    border-radius: 5px;
+    margin: 50px auto 0 auto;
+    padding: 20px;
+    width: 260px;
+    font-family: 'Pokemon';
+    font-size: 45px;
+    font-weight: bold;
+    color: #0f314c;
 }
 
 .inscription{
 	display:flex;
 	flex-direction:column;
 	align-items:center;
-	margin-top:100px;
+	margin: 130px auto;
 	height: 200px;
     padding: 20px;
     justify-content: center;
     background-color: #0f314c;
     border: 3px solid #28567b;
     border-radius: 20px;
-    width: 500px;
+    width: 240px;
 }
 
 .label-pseudo{
-	font-size:26px;
+	font-size:23px;
 	color:#d6f4ff;
 }
 
 .container-pseudo{
-	margin-top:30px;
+	margin-top:35px;
 	display:flex;
 	justify-content: center;
 	flex-wrap:wrap;
@@ -146,19 +170,53 @@ body{
 }
 
 .valider-pseudo{
-	margin-left: 25px;
     width: 120px;
+	padding: 10px;
     cursor: pointer;
     font-size: 22px;
     color: #d6f4ff;
     background-color: #28567b;
     border: 1px solid #28567b;
     border-radius: 5px;
+	margin-top:15px;
+	transition: .2s;
+}
+
+.valider-pseudo:hover{
+	background-color: #ffff00;
+	color:#28567b;
+}
+
+@media screen and (min-width: 500px){
+	.titre{
+		width:420px;
+	}
+	.inscription{
+		width:320px;
+	}
+}
+
+@media screen and (min-width:768px){
+	.titre{
+		width:600px;
+	}
+	.inscription{
+		width:450px;
+	}
+	.container-pseudo{
+		flex-wrap:no-wrap;
+	}
+	.valider-pseudo{
+		margin-left: 25px;
+		margin-top:0;
+		padding:0;
+	}
 }
 
 @media screen and (min-width:1024px){
-	.inscription{
-		margin-top:250px;
+	.titre{
+		font-size:55px;
+		padding:15px;
 	}
 }
 

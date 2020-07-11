@@ -1,14 +1,21 @@
 <template>
-	<div>
+	<div class="game">
 		<div>
-			<h3>Liste des joueurs</h3>
-			<div v-for="(player,index) in players" :key="index">
-				<span>{{ player }}</span>
-				<span v-if="player === username"> (Moi)</span>
+			<div class="infos">
+				<div class="winner" v-show="winner">
+					Gagnant: {{ winner }}
+				</div>
+			</div>
+			<div class="joueurs" v-show="!winner">
+				<h3>Liste des joueurs en lice</h3>
+				<div v-for="(player,index) in players" :key="index">
+					<span>{{ player }}</span>
+					<span v-if="player === username"> (Moi)</span>
+				</div>
 			</div>
 			<button v-on:click="sendReadyGame()" v-show="!gameReady">Lancer la partie</button>
 		</div>
-		<div v-show="gameReady">
+		<div v-show="gameReady && !winner">
 			<div>
 				<h2>Ordre des joueurs</h2>
 				<div v-for="(player, index) in players" :key="index">
@@ -16,9 +23,11 @@
 				</div>
 			</div>
 			<div>Joueur actuel: {{ playing }}</div>
-			<div>{{ countDown }}</div>
+			<div v-show="showTimer">{{ countDown }}</div>
 			<input type="text" name="pokemon" id="pokemon" v-model="pokemon" @input="inputPokemonChange" autocomplete="off">
-			<h3>Liste des pokémons</h3>
+		</div>
+		<div class="pokemons-container">
+			<h3>Liste des pokémons trouvés</h3>
 			<div style="margin-top:50px; display:flex; flex-wrap:wrap;" class="pokemons"> 
 				<div v-for="(pokemon, index) in pokemonsFound" :key="index" :id="'poke'+pokemon.id" style="width:80px; margin:5px; padding:2px;">
 					<div style="text-align:center">{{ pokemon.name }}</div>
@@ -38,7 +47,7 @@ export default {
 	props:{
 		username: String,
 		players: Array,
-		socket: Object
+		socket: Object,
 	},
 	data() {
 		return {
@@ -49,7 +58,9 @@ export default {
 			order: [],
 			myTurn: false,
 			playing: '',
-			countDown: 15,
+			winner: '',
+			countDown: 5,
+			showTimer: true
 		};
 	},
 	mounted() {
@@ -70,12 +81,17 @@ export default {
 
 		// Signal du serveur que le tour va passer au suivant
 		this.socket.on('nextTurn', (indexNextPlayer) => {
-			this.playing = this.players[indexNextPlayer];
-			if(this.players[indexNextPlayer] === this.username){
-				this.myTurn = true;
+			if(!this.winner){
+				this.playing = this.players[indexNextPlayer];
+				if(this.players[indexNextPlayer] === this.username){
+					this.myTurn = true;
+				}
+				this.countDown = 5;
+				this.countDownTimer(stop);
 			}
-			this.countDown = 15;
-			this.countDownTimer(stop);
+			else{
+				this.showTimer = false;
+			}
 		});
 
 		// Lorsque le serveur indique qu'un pokémon est trouvé
@@ -85,6 +101,28 @@ export default {
 			if(this.pokemons.length === 0){
 				alert('Bravo, vous avez tous gagné !');
 			}
+		});
+
+		this.socket.on('playerLost', (playerLost) => {
+			
+			if(this.players.length === 1){
+				this.countDownTimer(stop);
+				this.socket.emit('winner', this.players[0]);
+			}
+			else{
+				if(this.username === playerLost){
+					this.countDownTimer(stop);
+				}
+				else{
+					this.countDown = 5;
+					this.countDownTimer();
+				}
+			}
+		});
+
+		this.socket.on('winner', (winner) => {
+			this.showTimer = false;
+			this.winner = winner;
 		});
 
 	},
@@ -190,9 +228,6 @@ export default {
 							this.countDownTimer();
 						}, 1000);
 				}
-				else{
-					clearTimeout(t);
-				}
 			}
 			else{
 				clearTimeout(t);
@@ -202,8 +237,10 @@ export default {
 	watch: {
 		countDown:function(time){
 			if(time === 0 && this.playing === this.username){
-				alert('Perdu');
-				this.socket.emit('playerLost', this.playing);
+				if(this.players.length > 1){
+					console.log("perdu");
+					this.socket.emit('playerLost', this.playing);
+				}
 			}
 		},
 
@@ -212,4 +249,12 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped></style>
+<style>
+	.game{
+		background-color: #0f314c;
+		color:white;
+		padding:30px;
+		margin-top:50px;
+		min-height:60vh;
+	}
+</style>

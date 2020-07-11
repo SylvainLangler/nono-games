@@ -88,10 +88,15 @@ Socketio.on('connection', function(socket){
 
 	socket.on('playerLost', function(playerName){
 		let indexPlayer = players.indexOf(playerName);
-		let indexNextPlayer = getNextPlayer(indexPlayer);
 		players = players.filter(player => player != playerName);
+		let indexNextPlayer = getNextPlayer(indexPlayer-1);
 		Socketio.emit('updatePlayers', players);
 		Socketio.emit('nextTurn', indexNextPlayer);
+		Socketio.emit('playerLost', playerName);
+	});
+
+	socket.on('winner', function(winner){
+		Socketio.emit('winner', winner);
 	});
 });
 
