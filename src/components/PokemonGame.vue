@@ -1,37 +1,44 @@
 <template>
 	<div class="game">
 		<div>
-			<div class="infos">
-				<div class="winner" v-show="winner">
+			<div class="infos"  v-show="winner">
+				<div class="winner">
 					Gagnant: {{ winner }}
 				</div>
 			</div>
-			<div class="joueurs" v-show="!winner">
-				<h3>Liste des joueurs en lice</h3>
-				<div v-for="(player,index) in players" :key="index">
-					<span>{{ player }}</span>
-					<span v-if="player === username"> (Moi)</span>
+		</div>
+		<div class="joueurs" v-show="!winner && !gameReady">
+			<h2>Liste des joueurs</h2>
+			<div class="liste-joueurs">
+				<div class="joueur" v-for="(player,index) in players" :key="index">
+					<span v-bind:class="{ 'moi': player === username }">{{ player }}</span>
 				</div>
 			</div>
-			<button v-on:click="sendReadyGame()" v-show="!gameReady">Lancer la partie</button>
 		</div>
+		<button class="btn-start" v-on:click="sendReadyGame()" v-show="!gameReady">Lancer la partie</button>
 		<div v-show="gameReady">
-			<div v-show="!winner">
-				<div>
+			<div class="game-content" v-show="!winner">
+				<div class="ordre">
 					<h2>Ordre des joueurs</h2>
-					<div v-for="(player, index) in players" :key="index">
-						{{ index+1 }}: {{ player }}
+					<div class="joueurs-ordre">
+						<div v-for="(player, index) in players" :key="index">
+							{{ index+1 }}: <span v-bind:class="{ 'moi': player === username }">{{ player }}</span><span v-if="playing === player"> (Playing)</span>
+						</div>
 					</div>
 				</div>
-				<div>Joueur actuel: {{ playing }}</div>
-				<div v-show="showTimer">{{ countDown }}</div>
-				<input type="text" name="pokemon" id="pokemon" v-model="pokemon" @input="inputPokemonChange" autocomplete="off">
+				<div class="input-pokemon">
+					<div class="timer" v-show="showTimer">Temps restant: {{ countDown }} s</div>
+					<div class="poke-input">
+						<label for="pokemon">Entrez le nom d'un pokémon</label>
+						<input type="text" name="pokemon" id="pokemon" v-model="pokemon" @input="inputPokemonChange" autocomplete="off">
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="pokemons-container" v-show="gameReady">
 			<h3>Liste des pokémons trouvés</h3>
-			<div style="margin-top:50px; display:flex; flex-wrap:wrap;" class="pokemons"> 
-				<div v-for="(pokemon, index) in pokemonsFound" :key="index" :id="'poke'+pokemon.id" style="width:80px; margin:5px; padding:2px;">
+			<div class="pokemons"> 
+				<div class="pokemon" v-for="(pokemon, index) in pokemonsFound" :key="index" :id="'poke'+pokemon.id">
 					<div style="text-align:center">{{ pokemon.name }}</div>
 					<img :src="pokemon.img" style="width:100%;">
 				</div>
@@ -88,7 +95,6 @@ export default {
 		this.socket.on('nextTurn', (indexNextPlayer) => {
 			// S'il n'y a pas de gagnant
 			if(this.winner === ''){
-				console.log(this.players);
 				// On met à jour le joueur courant
 				this.playing = this.players[indexNextPlayer];
 				// Si c'est soi-même, on l'indique
@@ -241,6 +247,7 @@ export default {
 				this.pokemons.forEach((pokemon) => {
 					if(pokemon.id === idPoke){
 						this.pokemonsFound.push(pokemon);
+						this.pokemonsFound.sort(this.compare)
 						// On retire le pokemon trouvé de la liste des pokémons trouvables
 						this.removePokemon(idPoke);
 						this.socket.emit('pokemonFound', {pokemonId: pokemon.id, pokemonsFound : this.pokemonsFound, pokemons: this.pokemons});
@@ -300,5 +307,162 @@ export default {
 		padding:30px;
 		margin-top:50px;
 		min-height:65vh;
+		border-radius:10px;
+		display:flex;
+		flex-direction:column;
 	}
+
+	.infos{
+		background-color:yellow;
+		padding:20px;
+		width:45%;
+		height:65px;
+		display:flex;
+		justify-content: center;
+		align-items:center;
+		margin:15px auto 0px auto;
+		border-radius:5px;
+	}
+	
+	.winner{
+		font-size:25px;
+		color:#0f314c;
+	}
+
+	.joueurs{
+		display:flex;
+		flex-direction:column;
+		align-items:center;
+	}
+
+	.liste-joueurs{
+		display:flex;
+		flex-direction:row;
+		flex-wrap:wrap;
+		margin-top:20px;
+	}
+
+	.joueur{
+		margin:7px;
+		padding:10px;
+		background-color:#28567b;
+		border-radius:5px;
+	}
+
+	.moi{
+		color:yellow;
+	}
+	
+	.btn-start{
+		width: 170px;
+		padding: 10px;
+		cursor: pointer;
+		font-size: 20px;
+		color: #d6f4ff;
+		background-color: #28567b;
+		border: 1px solid #28567b;
+		border-radius: 5px;
+		margin-top:20px;
+		transition: .2s;
+		display: flex;
+		justify-content: center;
+		align-self: center;
+	}
+
+	.btn-start:hover{
+		background-color: #ffff00;
+		color:#28567b;
+	}
+
+	.game-content{
+		display:flex;
+		flex-direction:column;
+		align-items:center;
+		justify-content: center;
+	}
+
+	.ordre{
+		padding:15px 20px;
+		background-color:#28567b;
+		border-radius:5px;
+		width:250px;
+		display:flex;
+		flex-direction: column;
+	}
+
+	.ordre h2{
+		align-self:center;
+	}
+
+	.joueurs-ordre{
+		margin-top:15px;
+		margin-left:28px;
+	}
+
+	.input-pokemon{
+		display:flex;
+		flex-direction:column;
+		align-items:center;
+	}
+
+	.timer{
+		margin-top:20px;
+	}
+
+	.poke-input{
+		margin-top:15px;
+	}
+	#pokemon{
+		margin-top:10px;
+		width:200px;
+		height:50px;
+		display:flex;
+		font-size:26px;
+	}
+
+	.pokemons-container{
+		display:flex;
+		flex-direction:column;
+		justify-content: center;
+		align-items:center;
+		margin-top:30px;
+	}
+
+	.pokemons{
+		margin-top:25px; 
+		display:flex; 
+		flex-wrap:wrap;
+	}
+
+	.pokemon{
+		width: 110px;
+		margin: 5px;
+		padding: 20px 17px 5px 17px;
+		background-color:#28567b;
+		border-radius:5px;
+		display:flex;
+		flex-direction:column;
+		align-items:center;
+		justify-content: center;
+	}
+
+	@media screen and (min-width:765px){
+		.game-content{
+			flex-direction:row;
+			align-items:initial;
+		}
+		.ordre{
+			width:300px;
+		}
+		.input-pokemon{
+			width:400px;
+		}
+		.poke-input{
+			margin-top:30px;
+		}
+		#pokemon{
+			margin-top:10px;
+		}
+	}
+
 </style>

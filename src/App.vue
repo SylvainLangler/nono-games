@@ -61,10 +61,6 @@ export default {
 				this.ready = false;
 				this.joinable = true;
 			}
-			// if(this.ready === true && this.joinable === false && this.players.length === 1 && this.players[0] === this.username){
-			// 	console.log("gagné");
-			// 	this.winner = this.username;
-			// }
 		});
 
 		this.socket.on("preventJoining", () => {
@@ -106,7 +102,7 @@ export default {
  src: url("/static/fonts/pokemon_hollow.woff") format("woff")
 }
 
-html, body{
+*{
 	font-family: 'Raleway', sans-serif;
 	margin: 0;
 	padding: 0;
@@ -132,7 +128,7 @@ body{
     padding: 20px;
     width: 260px;
     font-family: 'Pokemon';
-    font-size: 45px;
+    font-size: 38px;
     font-weight: bold;
     color: #0f314c;
 }
@@ -190,6 +186,7 @@ body{
 @media screen and (min-width: 500px){
 	.titre{
 		width:420px;
+		font-size:42px;
 	}
 	.inscription{
 		width:320px;

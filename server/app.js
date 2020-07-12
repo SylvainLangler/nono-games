@@ -24,8 +24,10 @@ const Socketio = require("socket.io")(Http);
 // Liste des utilisateurs connectés
 let connectedUserMap = new Map();
 
+// Boolean partie est-elle joignable
 let joinable = true;
 
+// Liste des joueurs encore en lice
 let players = [];
 
 // à la connexion
