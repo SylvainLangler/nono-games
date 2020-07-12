@@ -68,7 +68,7 @@ export default {
 			myTurn: false,
 			playing: '',
 			winner: '',
-			countDown: 15,
+			countDown: 30,
 			showTimer: true
 		};
 	},
@@ -103,7 +103,7 @@ export default {
 				}
 
 				// On remet le timer à zero et on arrête le settimeout
-				this.countDown = 15;
+				this.countDown = 30;
 				this.countDownTimer(stop);
 			}
 			else{
@@ -142,7 +142,7 @@ export default {
 				}
 				// Sinon on continue la partie
 				else{
-					this.countDown = 15;
+					this.countDown = 30;
 					this.countDownTimer();
 				}
 			}
@@ -432,6 +432,7 @@ export default {
 		margin-top:25px; 
 		display:flex; 
 		flex-wrap:wrap;
+		justify-content: center;
 	}
 
 	.pokemon{
@@ -462,6 +463,9 @@ export default {
 		}
 		#pokemon{
 			margin-top:10px;
+		}
+		.pokemons{
+			justify-content: flex-start;
 		}
 	}
 
